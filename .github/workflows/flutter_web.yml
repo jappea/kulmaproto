@@ -12,11 +12,21 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # 🔹 tärkeä git-virheen välttämiseksi
+
+      - name: Setup Git (fix for pub get)
+        run: |
+          git config --global user.email "you@example.com"
+          git config --global user.name "GitHub Actions"
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
           flutter-version: "3.x"
+
+      - name: Enable Flutter web
+        run: flutter config --enable-web
 
       - name: Install dependencies
         run: flutter pub get
