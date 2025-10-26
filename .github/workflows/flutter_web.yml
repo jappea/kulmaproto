@@ -1,38 +1,14 @@
-name: Deploy Flutter Web to GitHub Pages
+name: Deploy static site to GitHub Pages
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Setup Git (fix for pub get)
-        run: |
-          git config --global user.email "you@example.com"
-          git config --global user.name "GitHub Actions"
-
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: "3.x"
-
-      - name: Enable Flutter web
-        run: flutter config --enable-web
-
-      - name: Install dependencies
-        run: flutter pub get
-
-      - name: Build web release
-        run: flutter build web --base-href "/kulmaproto/"
+      - uses: actions/checkout@v4
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
