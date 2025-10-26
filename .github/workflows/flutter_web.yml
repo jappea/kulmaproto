@@ -13,7 +13,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # 🔹 tärkeä git-virheen välttämiseksi
+          fetch-depth: 0
 
       - name: Setup Git (fix for pub get)
         run: |
@@ -28,14 +28,20 @@ jobs:
       - name: Enable Flutter web
         run: flutter config --enable-web
 
+      # 🔹 Tämä on kriittinen rivi — vaihda työskentelyhakemisto oikeaan kansioon
+      - name: Change to project directory
+        run: cd pyorankulmat
+
       - name: Install dependencies
+        working-directory: pyorankulmat
         run: flutter pub get
 
       - name: Build web release
+        working-directory: pyorankulmat
         run: flutter build web --base-href "/kulmaproto/"
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./build/web
+          publish_dir: ./pyorankulmat/build/web
