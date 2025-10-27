@@ -1,0 +1,15 @@
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(color: kCard, borderRadius: BorderRadius.circular(12), border: Border.all(color: kOutline)),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          const Row(children: [Icon(Icons.sticky_note_2_outlined, size: 16, color: kTextMuted), SizedBox(width: 6), Text('Muistiinpano', style: TextStyle(color: kTextMuted, fontSize: 12))]),
+          const SizedBox(height: 6),
+          Text(note, style: const TextStyle(fontSize: 11)),
+        ]),
+      );
+
+      if (note.isEmpty || !inline) {
+        return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          CardPanel(title: code, subtitle: pos, child: fields(c)),
+          if (note.isNotEmpty) ...[const SizedBox(height: 8), noteBox],
+        ]);
+      }

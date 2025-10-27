@@ -1,0 +1,4 @@
+          const Row(children: [Icon(Icons.sticky_note_2_outlined, size: 16, color: kTextMuted), SizedBox(width: 6), Text('Muistiinpano', style: TextStyle(color: kTextMuted, fontSize: 12))]),
+          const SizedBox(height: 6),
+          Text(note, style: const TextStyle(fontSize: 11)),
+        ]),

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+bool isPhone(BuildContext context) => MediaQuery.of(context).size.width < 700;
+
 const kBg = Color(0xFF0E1013);
 const kCard = Color(0xFF171A20);
 const kOutline = Color(0xFF252830);
@@ -15,14 +17,18 @@ class CardPanel extends StatelessWidget {
   const CardPanel({super.key, required this.title, required this.subtitle, required this.child, this.width});
   @override
   Widget build(BuildContext context) {
-    final isPhone = MediaQuery.of(context).size.width < 700;
-    final panelWidth = width ?? (isPhone ? 240.0 : 260.0);
+    final phone = isPhone(context);
+    final panelWidth = width ?? (phone ? 240.0 : 260.0);
     return Container(
       width: panelWidth,
-      padding: EdgeInsets.all(isPhone ? 10 : 12),
+      padding: EdgeInsets.all(phone ? 10 : 12),
       decoration: BoxDecoration(color: kCard, borderRadius: BorderRadius.circular(16), border: Border.all(color: kOutline)),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Row(children: [const Icon(Icons.article_rounded, size: 16, color: kTextMuted), const SizedBox(width: 6), Text(title, style: Theme.of(context).textTheme.titleMedium)]),
+        Row(children: [
+          Icon(Icons.article_rounded, size: phone ? 14 : 16, color: kTextMuted),
+          SizedBox(width: phone ? 4 : 6),
+          Text(title, style: Theme.of(context).textTheme.titleMedium),
+        ]),
         Text(subtitle, style: Theme.of(context).textTheme.labelSmall),
         const Divider(height: 20, color: kOutline),
         child,
@@ -43,7 +49,7 @@ class StepperField extends StatelessWidget {
   const StepperField({super.key, required this.label, required this.value, required this.onChanged, this.unit = '', this.min = -9999, this.max = 9999, this.step = 1, this.fractionDigits = 0});
   @override
   Widget build(BuildContext context) {
-    final isPhone = MediaQuery.of(context).size.width < 700;
+    final phone = isPhone(context);
     final text = value.toStringAsFixed(fractionDigits);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
@@ -64,10 +70,13 @@ class StepperField extends StatelessWidget {
                 if (v != null) onChanged(v.clamp(min, max));
               },
               child: Container(
-                height: isPhone ? 40 : 44,
+                height: phone ? 40 : 44,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(color: const Color(0xFF0F1217), borderRadius: BorderRadius.circular(10), border: Border.all(color: kOutline)),
-                child: Text(unit.isEmpty ? text : '$text $unit', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+                child: Text(
+                  unit.isEmpty ? text : '$text $unit',
+                  style: TextStyle(fontSize: phone ? 16 : 18, fontWeight: FontWeight.w600),
+                ),
               ),
             ),
           ),
@@ -78,11 +87,22 @@ class StepperField extends StatelessWidget {
     );
   }
   Widget _roundBtn(IconData icon, VoidCallback onTap) {
-    final isPhone = WidgetsBinding.instance.platformDispatcher.views.first.physicalSize.width / WidgetsBinding.instance.platformDispatcher.views.first.devicePixelRatio < 700;
+    // Default to smaller controls on phones
+    final phone = WidgetsBinding.instance.platformDispatcher.views.first.physicalSize.width /
+            WidgetsBinding.instance.platformDispatcher.views.first.devicePixelRatio <
+        700;
     return SizedBox(
-      width: isPhone ? 40 : 44,
-      height: isPhone ? 40 : 44,
-      child: Material(color: const Color(0xFF10141A), borderRadius: BorderRadius.circular(10), child: InkWell(onTap: onTap, borderRadius: BorderRadius.circular(10), child: Icon(icon, color: kTextMain, size: 20))),
+      width: phone ? 40 : 44,
+      height: phone ? 40 : 44,
+      child: Material(
+        color: const Color(0xFF10141A),
+        borderRadius: BorderRadius.circular(10),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(10),
+          child: Icon(icon, color: kTextMain, size: phone ? 18 : 20),
+        ),
+      ),
     );
   }
 }
