@@ -16,7 +16,6 @@ class KulmaApp extends StatelessWidget {
         colorScheme: ColorScheme.dark(
           primary: kPrimary,
           surface: kCard,
-          background: kBg,
           onSurface: kTextMain,
         ),
         scaffoldBackgroundColor: kBg,
@@ -44,7 +43,7 @@ class KulmaApp extends StatelessWidget {
           maxScale = 1.2;
         }
         final clamped = mq.textScaleFactor.clamp(0.9, maxScale);
-        return MediaQuery(data: mq.copyWith(textScaleFactor: clamped), child: child ?? const SizedBox());
+        return MediaQuery(data: mq.copyWith(textScaler: TextScaler.linear(clamped)), child: child ?? const SizedBox());
       },
       home: const GaragePage(),
     );
