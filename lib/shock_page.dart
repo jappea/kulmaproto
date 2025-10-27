@@ -12,10 +12,10 @@ class ShockPage extends StatelessWidget {
     final w = MediaQuery.of(context).size.width;
     final isPhone = w < 700;
     final hPad = isPhone ? 12.0 : 24.0;
-    const panelWidth = 260.0;
+    final panelWidth = isPhone ? 240.0 : 260.0;
     const gap = 6.0;
     const minNoteWidth = 140.0;
-    const maxNoteWidth = 200.0;
+    final maxNoteWidth = isPhone ? 180.0 : 200.0;
 
     Widget controls(String code, String pos, Shocks s) => CardPanel(title: code, subtitle: pos, child: Column(children: [
           StepperField(label: 'Kokonaisklikit', value: s.total.toDouble(), min: 0, max: 50, step: 1, fractionDigits: 0, onChanged: (v) { s.total = v.round().clamp(0, 50); onChanged(); }),
@@ -98,4 +98,3 @@ class ShockPage extends StatelessWidget {
     ]);
   }
 }
-

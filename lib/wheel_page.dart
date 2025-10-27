@@ -12,10 +12,10 @@ class WheelPage extends StatelessWidget {
     final w = MediaQuery.of(context).size.width;
     final isPhone = w < 700;
     final hPad = isPhone ? 12.0 : 24.0;
-    const panelWidth = 260.0;
+    final panelWidth = isPhone ? 240.0 : 260.0;
     const gap = 6.0;
     const minNoteWidth = 140.0;
-    const maxNoteWidth = 200.0;
+    final maxNoteWidth = isPhone ? 180.0 : 200.0;
 
     Widget fields(Corner c) => Column(children: [
           StepperField(label: 'Camber (°)', value: c.camber, min: -10, max: 10, step: 0.1, fractionDigits: 1, onChanged: (v) { c.camber = _round1(v); onChanged(); }),
@@ -128,4 +128,3 @@ Widget _axleLine(String label, double value) {
 }
 
 double _round1(double v) => (v * 10).roundToDouble() / 10.0;
-

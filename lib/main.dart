@@ -30,8 +30,23 @@ class KulmaApp extends StatelessWidget {
           titleMedium: TextStyle(color: kTextMain, fontWeight: FontWeight.w600),
         ),
       ),
+      builder: (context, child) {
+        final mq = MediaQuery.of(context);
+        final w = mq.size.width;
+        double maxScale;
+        if (w < 360) {
+          maxScale = 0.95;
+        } else if (w < 400) {
+          maxScale = 1.0;
+        } else if (w < 700) {
+          maxScale = 1.05;
+        } else {
+          maxScale = 1.2;
+        }
+        final clamped = mq.textScaleFactor.clamp(0.9, maxScale);
+        return MediaQuery(data: mq.copyWith(textScaleFactor: clamped), child: child ?? const SizedBox());
+      },
       home: const GaragePage(),
     );
   }
 }
-
