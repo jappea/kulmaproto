@@ -1,5 +1,5 @@
 name: pyorankulmat
-description: Responsive mobile-friendly app for wheel alignment and shocks notes
+description: Alustan kulmat – mobiiliystävällinen mittaus- ja historia-apu
 publish_to: 'none'
 
 version: 1.0.0+1
@@ -10,12 +10,15 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  cupertino_icons: ^1.0.8
+  cupertino_icons: ^1.0.6
+  shared_preferences: ^2.2.2
+  pdf: ^3.11.0
+  printing: ^5.13.4
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^3.0.0
+  flutter_lints: ^3.0.2
 
 flutter:
   uses-material-design: true

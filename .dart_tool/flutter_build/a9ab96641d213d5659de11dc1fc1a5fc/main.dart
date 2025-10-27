@@ -1,4 +1,4 @@
-// @dart=3.9
+// @dart=3.0
 // Flutter web bootstrap script for package:pyorankulmat/main.dart.
 //
 // Generated file. Do not edit.
