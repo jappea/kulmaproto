@@ -1,0 +1,14 @@
+theme: null
+plugins: []
+markdown: kramdown
+# Keep Jekyll from trying to process theme SCSS; serve static files as-is
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor
+include:
+  - index.html
+  - pyorankulmat.html
+  - favicon.png
+  - .nojekyll
