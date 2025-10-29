@@ -4,9 +4,9 @@ on:
   push:
     branches: [ main ]
     paths:
-      - 'web/pyorankulmat.html'
-      - 'web/favicon.png'
+      - 'web/**'
       - '.github/workflows/sync-docs.yml'
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -38,4 +38,3 @@ jobs:
         with:
           commit_message: 'chore: sync docs for GitHub Pages'
           file_pattern: docs/*
-
