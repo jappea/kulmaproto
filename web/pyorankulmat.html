@@ -1,0 +1,531 @@
+<!doctype html>
+<html lang="fi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>PyÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¶rÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¤nkulmat (React)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  </head>
+  <body class="min-h-screen bg-slate-50">
+    <div id="root" class="min-h-screen"></div>
+
+    <!-- APP_CODE: inserted by later patches -->
+    <script type="text/babel" data-presets="env,typescript,react">
+      function TabBtn({ active, children, onClick, disabled }:{ active?:boolean; children:React.ReactNode; onClick?:()=>void; disabled?:boolean }){
+        return (
+          <button className={`px-3 py-2 rounded-xl border text-sm ${active?"bg-slate-900 text-white":"bg-white hover:bg-slate-50"}`} onClick={onClick} disabled={disabled}>
+            {children}
+          </button>
+        );
+      }
+
+      function HeaderBar({ activeCar, activeSetup, onChangeSurface, share }){
+        if (!activeCar || !activeSetup) return null;
+        const Section = ({ title, right, children }) => (
+          <div className="bg-white/70 backdrop-blur rounded-2xl shadow p-4 md:p-6 mb-4">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg md:text-xl font-semibold">{title}</h2>
+              {right}
+            </div>
+            <div>{children}</div>
+          </div>
+        );
+        return (
+          <Section title={`${activeCar.brand || "(merkki)"} ${activeCar.model || "(malli)"}`} right={
+            <div className="flex flex-wrap gap-2 items-center">
+              <select className="inp" value={activeSetup.surface} onChange={(e)=>onChangeSurface(e.target.value)}>
+                {SURFACES.map(s=>(<option key={s} value={s}>{s}</option>))}
+              </select>
+              <Pill>{activeCar.suspType}</Pill>
+              <button className="btn" onClick={share}>Jaa linkkinÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¤</button>
+            </div>
+          }>
+            <div className="text-xs text-slate-600">Setuppi luotu: {new Date(activeSetup.createdAt).toLocaleString()}</div>
+          </Section>
+        );
+      }
+
+      function CornerCard({ id, data, onChange, suspType }){
+        const toe = calcToeMm(data);
+        return (
+          <div className="rounded-2xl border bg-white p-4 shadow-sm">
+            <div className="flex items-center justify-between mb-2">
+              <div className="font-semibold">{cornerName(id)}</div>
+              <div className="text-xs text-slate-600">{toe==null?"toe: ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œ":"toe: "+toe.toFixed(1)+" mm"}</div>
+            </div>
+            <div className="space-y-3">
+              <Field label="Jousen korkeus (mm)">
+                <input type="number" className="inp" inputMode="numeric" value={data.springHeightMm} onChange={(e)=>onChange({ springHeightMm: e.target.value===""?"": Number(e.target.value) })} />
+              </Field>
+              <Field label="Jousen kilot (kg)">
+                <input type="number" className="inp" step="0.1" value={data.springRateKg} onChange={(e)=>onChange({ springRateKg: e.target.value===""?"": Number(e.target.value) })} />
+              </Field>
+              <Field label="Camber (ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â°) [ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¹Ãƒâ€¦Ã¢â‚¬Å“6.0 ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¦ +1.0, 0.1 askel]">
+                <input type="number" className="inp" min={-6} max={1} step={0.1} value={data.camberDeg}
+                  onChange={(e)=>{
+                    const val = e.target.value===""?"": camberClamp(Number(e.target.value));
+                    onChange({ camberDeg: val });
+                  }} />
+              </Field>
+              <div className="grid grid-cols-2 gap-2">
+                <button className={`btn ${data.toeMode==='direct'? 'ring-2 ring-slate-700':''}`} onClick={()=>onChange({ toeMode:'direct' })}>Toe (mm)</button>
+                <button className={`btn ${data.toeMode==='rim'? 'ring-2 ring-slate-700':''}`} onClick={()=>onChange({ toeMode:'rim' })}>Vanteen etu/taka</button>
+              </div>
+              {data.toeMode === 'direct' ? (
+                <Field label="Toe (mm) [ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¹Ãƒâ€¦Ã¢â‚¬Å“5.0 ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¦ +8.0, 0.1 askel] ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â (toeÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¹Ãƒâ€¦Ã¢â‚¬Å“in = neg, toeÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¹Ãƒâ€¦Ã¢â‚¬Å“out = pos)">
+                  <input type="number" className="inp" min={-5} max={8} step={0.1} value={data.toeMm}
+                    onChange={(e)=>onChange({ toeMm: e.target.value===""?"": Number(e.target.value) })} />
+                </Field>
+              ) : (
+                <div className="grid grid-cols-1 gap-2">
+                  <Field label="Vanteen etureunan mitta (mm)">
+                    <input type="number" className="inp" step={0.1} value={data.rimFront}
+                      onChange={(e)=>onChange({ rimFront: e.target.value===""?"": Number(e.target.value) })} />
+                  </Field>
+                  <Field label="Vanteen takareunan mitta (mm)">
+                    <input type="number" className="inp" step={0.1} value={data.rimRear}
+                      onChange={(e)=>onChange({ rimRear: e.target.value===""?"": Number(e.target.value) })} />
+                  </Field>
+                  <div className="text-xs text-slate-600">Toe lasketaan: etu ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¹ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾Ãƒâ€šÃ‚Â¢ taka (positiivinen = toeÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¹Ãƒâ€¦Ã¢â‚¬Å“out, negatiivinen = toeÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¹Ãƒâ€¦Ã¢â‚¬Å“in)</div>
+                </div>
+              )}
+              {suspType === "3-tie" && (<div className="text-xs text-slate-500">3ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¹Ãƒâ€¦Ã¢â‚¬Å“tie klikkien syÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¶ttÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¶ lÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¶ytyy omalta vÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¤lilehdeltÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¤ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¤n.</div>)}
+            </div>
+          </div>
+        );
+      }
+
+      function ThreeWayCard({ id, data, onChange }){
+        const clicks = data.clicks3 || { total: 0, fast: 0, slow: 0 };
+        function setClicks(patch: Partial<Clicks3Way>) { onChange({ clicks3: { ...clicks, ...patch } }); }
+        return (
+          <div className="rounded-2xl border bg-white p-4 shadow-sm">
+            <div className="font-semibold mb-2">{cornerName(id)}</div>
+            <div className="grid grid-cols-1 gap-3">
+              <Field label="Kokonais klikkien mÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¤ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¤rÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¤ (0ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œ50)">
+                <input type="number" className="inp" min={0} max={50} value={clicks.total}
+                  onChange={(e)=>setClicks({ total: clamp(Number(e.target.value), 0, 50) })} />
+              </Field>
+              <Field label="Nopea puoli (0ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œ50)">
+                <input type="number" className="inp" min={0} max={50} value={clicks.fast}
+                  onChange={(e)=>setClicks({ fast: clamp(Number(e.target.value), 0, 50) })} />
+              </Field>
+              <Field label="Hidas puoli (0ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œ50)">
+                <input type="number" className="inp" min={0} max={50} value={clicks.slow}
+                  onChange={(e)=>setClicks({ slow: clamp(Number(e.target.value), 0, 50) })} />
+              </Field>
+            </div>
+          </div>
+        );
+      }
+
+// FooterActions removed (ei tulostuspainiketta)
+
+      function PrintView({ activeCar, activeSetup }){
+        if (!activeCar || !activeSetup) return <div className="text-sm text-slate-600">Ei tulostettavaa.</div>;
+        const frontToe = totalToe("front", activeSetup.corners);
+        const rearToe = totalToe("rear", activeSetup.corners);
+        return (
+          <div className="text-sm">
+            <div className="mb-4">
+              <div className="text-xl font-bold">{activeCar.brand} {activeCar.model}</div>
+              <div className="text-xs">Alusta: {activeCar.suspType} ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â Ajoalusta: {activeSetup.surface} ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â PÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¤ivÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¤ys: {new Date(activeSetup.createdAt).toLocaleDateString()}</div>
+            </div>
+            <div>
+              <div className="font-semibold mb-2">Sivu 1 ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â Perusasetukset</div>
+              <div className="grid grid-cols-2 gap-x-6 gap-y-2">
+                <div className="lab">Etuakselin kokonais toe:</div>
+                <div className="val">{frontToe==null?"ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œ":`${frontToe} mm`}</div>
+                <div className="lab">TakaÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¹Ãƒâ€¦Ã¢â‚¬Å“akselin kokonais toe:</div>
+                <div className="val">{rearToe==null?"ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œ":`${rearToe} mm`}</div>
+              </div>
+              <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3">
+                {CORNERS.map((id)=> (
+                  <div key={id} className="border rounded-xl p-3">
+                    <div className="font-medium mb-1">{cornerName(id)}</div>
+                    <table className="w-full text-sm">
+                      <tbody>
+                        <tr><td className="lab pr-3">Jousen korkeus</td><td className="val">{n(activeSetup.corners[id].springHeightMm)} mm</td></tr>
+                        <tr><td className="lab pr-3">Jousen kilot</td><td className="val">{n(activeSetup.corners[id].springRateKg)} kg</td></tr>
+                        <tr><td className="lab pr-3">Camber</td><td className="val">{n(activeSetup.corners[id].camberDeg)} ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â°</td></tr>
+                        <tr><td className="lab pr-3">Toe</td><td className="val">{fmtToemm(activeSetup.corners[id])}</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                ))}
+              </div>
+            </div>
+            {activeCar.suspType === "3-tie" && (
+              <div style={{ breakInside: "avoid" }}>
+                <div style={{ height: "14mm" }} />
+                <hr className="my-2 border-dashed" />
+                <div className="font-semibold mb-2">Sivu 2 ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â 3ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¹Ãƒâ€¦Ã¢â‚¬Å“tie klikkiasetukset</div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {CORNERS.map((id)=> (
+                    <div key={id} className="border rounded-xl p-3">
+                      <div className="font-medium mb-1">{cornerName(id)}</div>
+                      <table className="w-full text-sm">
+                        <tbody>
+                          <tr><td className="lab pr-3">Kokonais</td><td className="val">{activeSetup.corners[id].clicks3?.total ?? "ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œ"}</td></tr>
+                          <tr><td className="lab pr-3">Nopea</td><td className="val">{activeSetup.corners[id].clicks3?.fast ?? "ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œ"}</td></tr>
+                          <tr><td className="lab pr-3">Hidas</td><td className="val">{activeSetup.corners[id].clicks3?.slow ?? "ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œ"}</td></tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            <div className="mt-4">
+              <div className="font-semibold mb-1">Muistiinpanot</div>
+              <div className="whitespace-pre-wrap border rounded-xl p-3 min-h-[40mm]">{activeSetup.notes || ""}</div>
+            </div>
+          </div>
+        );
+      }
+    </script>
+    <script type="text/babel" data-presets="env,typescript,react">
+      const { useEffect, useMemo, useRef, useState } = React;
+
+      const SURFACES = ["asfaltti", "sora", "jÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¤ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¤"];
+      const SUSP_TYPES = ["1-tie", "3-tie"];
+
+      function uid() { return Math.random().toString(36).slice(2, 9); }
+
+      // Types removed for runtime JS
+      const CORNERS = ["FL", "FR", "RL", "RR"];
+
+      // Interfaces removed (not needed in browser)
+
+      const LS_KEY = "pyorankulmat_v1";
+      function loadState() {
+        try {
+          const raw = localStorage.getItem(LS_KEY);
+          if (!raw) return { cars: [], activeCarId: null, activeSetupId: null };
+          const parsed = JSON.parse(raw);
+          if (!Array.isArray(parsed.cars)) throw new Error("bad");
+          return parsed;
+        } catch { return { cars: [], activeCarId: null, activeSetupId: null }; }
+      }
+      function saveState(state){ localStorage.setItem(LS_KEY, JSON.stringify(state)); }
+
+      function emptyCorner(): CornerSetup {
+        return { springHeightMm: "", springRateKg: "", camberDeg: "", toeMode: "direct", toeMm: "", rimFront: "", rimRear: "", clicks3: { total: 0, fast: 0, slow: 0 } };
+      }
+      function clone<T>(x:T):T { return JSON.parse(JSON.stringify(x)); }
+
+      function round1(n){ return Math.round(n*10)/10; }
+      function camberClamp(n){ return Math.max(-6, Math.min(1, Math.round(n*10)/10)); }
+      function calcToeMm(c){
+        if (c.toeMode === "direct") {
+          if (c.toeMm === "" || typeof c.toeMm !== "number") return null; return round1(c.toeMm);
+        }
+        if (c.rimFront === "" || c.rimRear === "" || typeof c.rimFront !== "number" || typeof c.rimRear !== "number") return null;
+        return round1(c.rimFront - c.rimRear);
+      }
+      function totalToe(axle, corners){
+        const ids = axle === "front" ? ["FL","FR"] : ["RL","RR"];
+        const a = calcToeMm(corners[ids[0]]); const b = calcToeMm(corners[ids[1]]); if (a==null||b==null) return null; return round1(a+b);
+      }
+
+      function clamp(n,a,b){ return Math.max(a, Math.min(b, n)); }
+      function Field({ label, children }){ return (
+        <label className="block"><div className="lab mb-1">{label}</div>{children}</label>
+      ); }
+      const Pill = ({ children }) => (
+        <span className="px-2 py-1 rounded-full text-xs md:text-sm bg-gray-100 border">{children}</span>
+      );
+      function cornerName(id){ return ({ FL: "EtuÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¹Ãƒâ€¦Ã¢â‚¬Å“vasen (FL)", FR: "EtuÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¹Ãƒâ€¦Ã¢â‚¬Å“oikea (FR)", RL: "TakaÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¹Ãƒâ€¦Ã¢â‚¬Å“vasen (RL)", RR: "TakaÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¹Ãƒâ€¦Ã¢â‚¬Å“oikea (RR)" })[id]; }
+      function n(v){ return (v===null || v===undefined || v==="")?"ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œ":v; }
+      function fmtToemm(c){ const mm = calcToeMm(c); return mm==null?"ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œ":`${mm} mm`; }
+    </script>
+    <!-- APP_CODE_END -->
+    <script type="text/babel" data-presets="env,typescript,react">
+      const Section: React.FC<{ title: string; right?: React.ReactNode }> = ({ title, right, children }) => (
+        <div className="bg-white/70 backdrop-blur rounded-2xl shadow p-4 md:p-6 mb-4">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg md:text-xl font-semibold">{title}</h2>
+            {right}
+          </div>
+          <div>{children}</div>
+        </div>
+      );
+
+      function App(){
+        const [state, setState] = useState(() => loadState());
+        useEffect(() => saveState(state), [state]);
+
+        const activeCar = useMemo(() => state.cars.find((c) => c.id === state.activeCarId) || null, [state.cars, state.activeCarId]);
+        const activeSetup = useMemo(() => {
+          if (!activeCar) return null;
+          return (activeCar.setups.find((s) => s.id === state.activeSetupId) || activeCar.setups[0] || null);
+        }, [activeCar, state.activeSetupId]);
+
+        const [tab, setTab] = useState("garage");
+
+        function addCar(partial) {
+          const car = { id: uid(), brand: partial?.brand || "", model: partial?.model || "", suspType: partial?.suspType || "1-tie", defaultSurface: partial?.defaultSurface || "asfaltti", setups: [] };
+          setState((s) => ({ ...s, cars: [...s.cars, car], activeCarId: car.id }));
+        }
+        function updateCar(patch: Partial<CarEntry>) {
+          if (!activeCar) return; setState((s)=>({ ...s, cars: s.cars.map((c)=>c.id===activeCar.id?{...c, ...patch}:c) }));
+        }
+        function removeCar(id: string){ setState((s)=>{ const cars = s.cars.filter(c=>c.id!==id); const activeCarId = cars.length?cars[0].id:null; return { ...s, cars, activeCarId, activeSetupId: null }; }); }
+        function newSetupFromPrevious(){
+          if (!activeCar) return; const last = activeCar.setups[0];
+          const baseCorners = CORNERS.reduce((acc, id) => { acc[id] = last? clone(last.corners[id]) : emptyCorner(); return acc; }, {});
+          const setup: SetupEntry = { id: uid(), createdAt: new Date().toISOString(), notes: last?.notes||"", surface: last?.surface||activeCar.defaultSurface, corners: baseCorners, attachments: [], links: [] };
+          setState((s)=>({ ...s, cars: s.cars.map((c)=>c.id===activeCar.id?{...c, setups:[setup, ...c.setups]}:c), activeSetupId: setup.id })); setTab("base");
+        }
+        function ensureFirstSetup(){ if (!activeCar) return; if (activeCar.setups.length) return; const setup: SetupEntry = { id: uid(), createdAt: new Date().toISOString(), notes: "", surface: activeCar.defaultSurface, corners:{FL:emptyCorner(),FR:emptyCorner(),RL:emptyCorner(),RR:emptyCorner()}, attachments:[], links:[]}; setState((s)=>({ ...s, cars: s.cars.map(c=>c.id===activeCar.id?{...c, setups:[setup]}:c), activeSetupId: setup.id })); }
+        useEffect(()=>{ if (activeCar && !activeCar.setups.length) ensureFirstSetup(); }, [activeCar?.id]);
+        function selectCar(id:string){ setState((s)=>({ ...s, activeCarId:id, activeSetupId:null })); setTab("base"); }
+        function selectSetup(id:string){ setState((s)=>({ ...s, activeSetupId:id })); }
+        function updateSetup(patch: Partial<SetupEntry>){ if (!activeCar || !activeSetup) return; setState((s)=>({ ...s, cars: s.cars.map(c=>{ if (c.id!==activeCar.id) return c; return { ...c, setups: c.setups.map(st=>st.id===activeSetup.id?{...st, ...patch}:st) }; }) })); }
+        function updateCorner(id: CornerId, patch: Partial<CornerSetup>){ if (!activeSetup || !activeCar) return; const nextCorners = { ...activeSetup.corners, [id]: { ...activeSetup.corners[id], ...patch } }; updateSetup({ corners: nextCorners }); }
+        function deleteSetup(id:string){ if (!activeCar) return; setState((s)=>({ ...s, cars: s.cars.map(c=>c.id===activeCar.id?{...c, setups: c.setups.filter(st=>st.id!==id)}:c), activeSetupId: s.activeSetupId===id?null:s.activeSetupId })); }
+
+        function exportGarage(){ const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"}); const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=`pyorankulmat_${new Date().toISOString().slice(0,10)}.json`; a.click(); }
+        function importGarage(file: File){ const r=new FileReader(); r.onload=()=>{ try{ const parsed=JSON.parse(String(r.result)); setState(parsed);}catch{ alert("Virheellinen tiedosto"); } }; r.readAsText(file); }
+        function shareCurrentSetupLink(){ if(!activeCar||!activeSetup) return alert("Valitse auto ja setuppi"); const minimal={car:{brand:activeCar.brand,model:activeCar.model,suspType:activeCar.suspType}, setup: activeSetup}; const json=JSON.stringify(minimal); const b64=btoa(unescape(encodeURIComponent(json))); const url=`${location.origin}${location.pathname}#share=${b64}`; navigator.clipboard?.writeText(url); alert("Linkki kopioitu leikepÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¶ydÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¤lle"); }
+        const sharedData = useMemo(()=>{ const h=location.hash; const m=h.match(/#share=([^&]+)/); if(!m) return null; try{ const json=decodeURIComponent(escape(atob(m[1]))); return JSON.parse(json);}catch{ return null; } }, []);
+        function openPrint(){ window.print(); }
+
+        return (
+          <>
+          <div className="no-print min-h-screen w-full bg-gradient-to-br from-slate-50 to-slate-100 text-slate-800">
+            <header className="sticky top-0 z-10 bg-white/70 backdrop-blur border-b">
+              <div className="max-w-6xl mx-auto px-3 md:px-6 py-3 flex items-center gap-2 md:gap-4">
+                <div className="font-bold text-base md:text-xl">PyÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¶rÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¤nkulmat</div>
+                <nav className="ml-auto flex gap-1 md:gap-2 text-sm md:text-base">
+                  <TabBtn active={tab === "garage"} onClick={() => setTab("garage")}>Autotalli</TabBtn>
+                  <TabBtn active={tab === "base"} onClick={() => setTab("base")} disabled={!activeCar}>Perusasetukset</TabBtn>
+                  {activeCar?.suspType === "3-tie" && (<TabBtn active={tab === "three"} onClick={() => setTab("three")} disabled={!activeCar}>3ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¹Ãƒâ€¦Ã¢â‚¬Å“tie</TabBtn>)}
+                  <TabBtn active={tab === "notes"} onClick={() => setTab("notes")} disabled={!activeCar}>Muistiinpanot</TabBtn>
+                  
+                </nav>
+              </div>
+            </header>
+
+            <main className="max-w-6xl mx-auto px-3 md:px-6 py-4 md:py-8">
+              {tab === "garage" && (
+                <>
+                  <Section title="Autot" right={
+                    <div className="flex gap-2">
+                      <button className="btn" onClick={() => addCar()}>+ LisÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¤ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¤ auto</button>
+                      
+                      
+                    </div>
+                  }>
+                    {state.cars.length === 0 && (<p className="text-sm text-slate-600">Ei autoja vielÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¤. LisÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¤ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¤ ensimmÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¤inen auto.</p>)}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {state.cars.map((car) => (
+                        <div key={car.id} className={`rounded-2xl border bg-white p-4 shadow-sm ${state.activeCarId===car.id?"ring-2 ring-slate-700":""}`}>
+                          <div className="flex items-start justify-between gap-3">
+                            <div>
+                              <div className="font-semibold text-lg">{car.brand || "(merkki)"} {car.model || "(malli)"}</div>
+                              <div className="flex gap-2 mt-1 text-xs">
+                                <Pill>{car.suspType}</Pill>
+                                <Pill>oletus: {car.defaultSurface}</Pill>
+                                <Pill>{car.setups.length} setuppia</Pill>
+                              </div>
+                            </div>
+                            <div className="flex gap-2">
+                              <button className="btn" onClick={() => selectCar(car.id)}>Valitse</button>
+                              <button className="btn btn-ghost" onClick={() => removeCar(car.id)}>Poista</button>
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-1 md:grid-cols-4 gap-2 mt-4">
+                            <input className="inp" placeholder="Merkki" value={car.brand} onChange={(e)=>{
+                              if (car.id===state.activeCarId) updateCar({ brand: e.target.value });
+                              else setState((s)=>({ ...s, cars: s.cars.map(c=>c.id===car.id?{...c, brand:e.target.value}:c) }));
+                            }} />
+                            <input className="inp" placeholder="Malli" value={car.model} onChange={(e)=>{
+                              if (car.id===state.activeCarId) updateCar({ model: e.target.value });
+                              else setState((s)=>({ ...s, cars: s.cars.map(c=>c.id===car.id?{...c, model:e.target.value}:c) }));
+                            }} />
+                            <select className="inp" value={car.suspType} onChange={(e)=>{
+                              const susp = e.target.value;
+                              if (car.id===state.activeCarId) updateCar({ suspType: susp });
+                              else setState((s)=>({ ...s, cars: s.cars.map(c=>c.id===car.id?{...c, suspType:susp}:c) }));
+                            }}>
+                              {SUSP_TYPES.map((t)=>(<option key={t} value={t}>{t}</option>))}
+                            </select>
+                            <select className="inp" value={car.defaultSurface} onChange={(e)=>{
+                              const surf = e.target.value;
+                              if (car.id===state.activeCarId) updateCar({ defaultSurface: surf });
+                              else setState((s)=>({ ...s, cars: s.cars.map(c=>c.id===car.id?{...c, defaultSurface:surf}:c) }));
+                            }}>
+                              {SURFACES.map((s)=>(<option key={s} value={s}>{s}</option>))}
+                            </select>
+                          </div>
+                          {car.id===state.activeCarId && (
+                            <div className="mt-3 flex flex-wrap gap-2">
+                              <button className="btn" onClick={newSetupFromPrevious}>Uusi setuppi edellisen pohjalta</button>
+                              <button className="btn" onClick={()=>{ ensureFirstSetup(); setTab("base"); }}>Avaa asetukset</button>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </Section>
+                  {activeCar && (
+                    <Section title="Setuppien hallinta">
+                      {activeCar.setups.length===0 && <p className="text-sm text-slate-600">Ei tallennettuja setuppeja vielÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¤.</p>}
+                      <div className="flex flex-col gap-2">
+                        {activeCar.setups.map((st)=> (
+                          <div key={st.id} className={`flex items-center gap-2 p-3 rounded-xl border bg-white ${state.activeSetupId===st.id?"ring-2 ring-slate-700":""}`}>
+                            <div className="flex-1">
+                              <div className="font-medium">{new Date(st.createdAt).toLocaleString()}</div>
+                              <div className="text-xs text-slate-600 flex gap-2 mt-1">
+                                <Pill>{st.surface}</Pill>
+                                <span className="truncate max-w-[40ch]">{st.notes || "(ei muistiinpanoja)"}</span>
+                              </div>
+                            </div>
+                            <button className="btn" onClick={()=>{selectSetup(st.id); setTab("base");}}>Avaa</button>
+                            <button className="btn btn-ghost" onClick={()=>deleteSetup(st.id)}>Poista</button>
+                          </div>
+                        ))}
+                      </div>
+                    </Section>
+                  )}
+                </>
+              )}
+
+              {tab === "base" && activeCar && activeSetup && (
+                <>
+                  <HeaderBar activeCar={activeCar} activeSetup={activeSetup} onChangeSurface={(surface)=>updateSetup({ surface })} share={shareCurrentSetupLink} />
+                  <Section title="Akselien kokonais toe (mm)">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <div className="rounded-xl border p-3 bg-white">
+                        <div className="text-sm">Etuakseli</div>
+                        <div className="text-3xl font-bold">{totalToe("front", activeSetup.corners) ?? "ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œ"} <span className="text-base font-normal">mm</span></div>
+                        <div className="text-xs text-slate-600">(toeÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¹Ãƒâ€¦Ã¢â‚¬Å“in = negatiivinen, toeÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¹Ãƒâ€¦Ã¢â‚¬Å“out = positiivinen)</div>
+                      </div>
+                      <div className="rounded-xl border p-3 bg-white">
+                        <div className="text-sm">TakaÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¹Ãƒâ€¦Ã¢â‚¬Å“akseli</div>
+                        <div className="text-3xl font-bold">{totalToe("rear", activeSetup.corners) ?? "ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œ"} <span className="text-base font-normal">mm</span></div>
+                        <div className="text-xs text-slate-600">(toeÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¹Ãƒâ€¦Ã¢â‚¬Å“in = negatiivinen, toeÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¹Ãƒâ€¦Ã¢â‚¬Å“out = positiivinen)</div>
+                      </div>
+                    </div>
+                  </Section>
+                  <Section title="PyÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¶rÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¤n kulma tiedot (kulmakohtaiset)">
+                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+                      {CORNERS.map((id)=> (<CornerCard key={id} id={id} data={activeSetup.corners[id]} onChange={(patch)=>updateCorner(id, patch)} suspType={activeCar.suspType} />))}
+                    </div>
+                  </Section>
+                  
+                </>
+              )}
+
+              {tab === "three" && activeCar && activeCar.suspType === "3-tie" && activeSetup && (
+                <>
+                  <HeaderBar activeCar={activeCar} activeSetup={activeSetup} onChangeSurface={(surface)=>updateSetup({ surface })} share={shareCurrentSetupLink} />
+                  <Section title="3ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¹Ãƒâ€¦Ã¢â‚¬Å“tie klikkiasetukset (0ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œ50)">
+                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+                      {CORNERS.map((id)=> (<ThreeWayCard key={id} id={id} data={activeSetup.corners[id]} onChange={(patch)=>updateCorner(id, patch)} />))}
+                    </div>
+                  </Section>
+                  
+                </>
+              )}
+
+              {tab === "notes" && activeCar && activeSetup && (
+                <>
+                  <HeaderBar activeCar={activeCar} activeSetup={activeSetup} onChangeSurface={(surface)=>updateSetup({ surface })} share={shareCurrentSetupLink} />
+                  <Section title="Muistiinpanot">
+                    <textarea className="inp h-32" placeholder="Kirjaa muutokset, tuntemukset, rengaspaineet tms."
+                      value={activeSetup.notes}
+                      onChange={(e)=>updateSetup({ notes: e.target.value })}
+                    />
+                  </Section>
+                  
+                </>
+              )}
+
+              >
+                    <button className="btn" onClick={()=>setTab(activeCar? (activeCar.suspType==="3-tie"?"three":"base") : "garage")}>Takaisin</button>
+                  </div>
+                </div>
+              )}
+            </main>
+
+            <style dangerouslySetInnerHTML={{__html: `
+              .btn{padding:.5rem .75rem;border-radius:.75rem;border:1px solid #e2e8f0;background:#fff;box-shadow:0 1px 1px rgba(0,0,0,.05);font-size:.875rem;transition:background .15s;}
+              .btn:hover{background:#f8fafc}
+              .btn:active{transform:translateY(1px)}
+              .btn-ghost{background:transparent;border-color:#cbd5e1}
+              .inp{width:100%;padding:.5rem .75rem;border-radius:.75rem;border:1px solid #e2e8f0;background:#fff;box-shadow:0 1px 1px rgba(0,0,0,.05);outline:none}
+              .inp:focus{box-shadow:0 0 0 2px rgba(148,163,184,.4)}
+              .lab{font-size:.75rem;color:#475569}
+              .val{font-size:.875rem;font-weight:600}
+              @media screen{ .print-only{ display:none !important } }
+              @media print{ .no-print{ display:none !important } .print-only{ display:block !important } header, nav{display:none!important} @page{size:A4;margin:12mm} }
+            `}}/>
+          </div>
+          {/* Print-only render (always in DOM, shown only when printing) */}
+          <div className="print-only">
+            <div className="p-4 md:p-8">
+              <PrintView activeCar={sharedData?.car || activeCar} activeSetup={sharedData?.setup || activeSetup} />
+              <div className="mt-4 text-center text-xs text-slate-500">Generoitu PyÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¶rÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¤nkulmatÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¹Ãƒâ€¦Ã¢â‚¬Å“ohjelmalla</div>
+            </div>
+          </div>
+          </>
+        );
+      }
+
+      function AddLinkForm({ onAdd }:{ onAdd:(url:string,label:string)=>void }){
+        const [url, setUrl] = React.useState("");
+        const [label, setLabel] = React.useState("");
+        return (
+          <div className="flex flex-col md:flex-row gap-2">
+            <input className="inp flex-1" placeholder="https://ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¦" value={url} onChange={(e)=>setUrl(e.target.value)} />
+            <input className="inp flex-1" placeholder="Kuvaus (valinnainen)" value={label} onChange={(e)=>setLabel(e.target.value)} />
+            <button className="btn" onClick={()=>{ if (!url) return; onAdd(url, label); setUrl(""); setLabel(""); }}>LisÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¤ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¤</button>
+          </div>
+        );
+      }
+
+      // Expose App for the boot script
+      window.App = App;
+    </script>
+
+    <script>
+      (function boot(){
+        var rootEl = document.getElementById('root');
+        function fallback(msg){ rootEl.innerHTML = '<div style="padding:16px;font-family:system-ui,sans-serif">'+msg+'</div>'; }
+        function renderApp(){
+          try {
+            var root = ReactDOM.createRoot(rootEl);
+            root.render(React.createElement(window.App));
+          } catch (e) {
+            console.error(e);
+            fallback('KÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¤ynnistys epÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¤onnistui: '+ e.message);
+          }
+        }
+        // 1) Wait for React/ReactDOM from CDNs
+        (function waitReact(){
+          if (!(window.React && window.ReactDOM)) {
+            var rTries = 0; var rt = setInterval(function(){
+              if (window.React && window.ReactDOM) { clearInterval(rt); waitApp(); }
+              else if (++rTries > 60) { clearInterval(rt); fallback('CDN-kirjastojen lataus epÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¤onnistui. Varmista verkkoyhteys.'); }
+            }, 50);
+          } else { waitApp(); }
+        })();
+        // 2) Wait for Babel to compile inline TSX so window.App appears
+        function waitApp(){
+          if (window.App) return renderApp();
+          var aTries = 0; var at = setInterval(function(){
+            if (window.App) { clearInterval(at); renderApp(); }
+            else if (++aTries > 120) { clearInterval(at); fallback('Sovellus ei valmistunut (Babel). PÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¤ivitÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¤ sivu (Ctrl+F5).'); }
+            else { rootEl.textContent = 'LadataanÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¦'; }
+          }, 50);
+        }
+      })();
+    </script>
+  </body>
+  </html>
+
